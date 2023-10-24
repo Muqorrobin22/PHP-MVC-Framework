@@ -3,7 +3,7 @@
     "description": "Create own PHP MVC Framework",
     "autoload": {
         "psr-4": {
-            "Muqorrobin\\PhpmvcFramework\\": "src/"
+            "app\\" : "./"
         }
     },
     "authors": [
