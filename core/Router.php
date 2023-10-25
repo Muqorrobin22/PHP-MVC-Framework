@@ -5,19 +5,26 @@ namespace app\core;
 class Router
 {
     public Request $request;
+    public Response $response;
     protected array $routes = array();
 
     /**
      * @param Request $request
      */
-    public function __construct(Request $request)
+    public function __construct(Request $request, Response $response)
     {
         $this->request = $request;
+        $this->response = $response;
     }
 
     public function get($path, $callback)
     {
         $this->routes["get"][$path] = $callback;
+    }
+
+    public function post($path, $callback)
+    {
+        $this->routes["post"][$path] = $callback;
     }
 
     public function resolve()
@@ -28,10 +35,42 @@ class Router
         $callback = $this->routes[$method][$path] ?? false;
 
         if ($callback === false) {
-            echo "Not Found";
-            exit;
+            $this->response->set_status_code(404);
+            return $this->renderView("_404");
         }
 
-        echo call_user_func($callback);
+        if (is_string($callback)) {
+            return $this->renderView($callback);
+        }
+
+        return call_user_func($callback);
     }
+
+    public function renderView($view)
+    {
+        $layoutContent = $this->layoutContent();
+        $viewOnlyContent = $this->renderViewOnly($view);
+        return str_replace("{{content}}", $viewOnlyContent, $layoutContent);
+    }
+
+    protected function renderContent($viewOnlyContent)
+    {
+        $layoutContent = $this->layoutContent();
+        return str_replace("{{content}}", $viewOnlyContent, $layoutContent);
+    }
+
+    protected function layoutContent()
+    {
+        ob_start();
+        include_once Application::$ROOT_DIR . "/views/layouts/main.php";
+        return ob_get_clean();
+    }
+
+    protected function renderViewOnly($view)
+    {
+        ob_start();
+        include_once Application::$ROOT_DIR . "/views/$view.php";
+        return ob_get_clean();
+    }
+
 }
