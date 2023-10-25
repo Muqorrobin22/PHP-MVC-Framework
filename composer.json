@@ -1,0 +1,16 @@
+{
+    "name": "muqorrobin/phpmvc-framework",
+    "description": "Create own PHP MVC Framework",
+    "autoload": {
+        "psr-4": {
+            "app\\" : "./"
+        }
+    },
+    "authors": [
+        {
+            "name": "Achmad Muqorrobin",
+            "email": "achmadmuqorrobinassholih@gmail.com"
+        }
+    ],
+    "require": {}
+}
