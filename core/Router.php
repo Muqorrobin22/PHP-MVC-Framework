@@ -2,6 +2,8 @@
 
 namespace app\core;
 
+use http\Params;
+
 class Router
 {
     public Request $request;
@@ -43,13 +45,17 @@ class Router
             return $this->renderView($callback);
         }
 
+        if (is_array($callback)) {
+            $callback[0] = new $callback[0]();
+        }
+
         return call_user_func($callback);
     }
 
-    public function renderView($view)
+    public function renderView($view, $params = [])
     {
         $layoutContent = $this->layoutContent();
-        $viewOnlyContent = $this->renderViewOnly($view);
+        $viewOnlyContent = $this->renderViewOnly($view, $params);
         return str_replace("{{content}}", $viewOnlyContent, $layoutContent);
     }
 
@@ -66,8 +72,12 @@ class Router
         return ob_get_clean();
     }
 
-    protected function renderViewOnly($view)
+    protected function renderViewOnly($view, $params)
     {
+        foreach ($params as $key => $value) {
+            $$key = $value;
+        }
+
         ob_start();
         include_once Application::$ROOT_DIR . "/views/$view.php";
         return ob_get_clean();
