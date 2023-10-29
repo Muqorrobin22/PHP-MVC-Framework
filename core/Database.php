@@ -16,4 +16,71 @@ class Database
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 
+    public function applyMigrations()
+    {
+        $this->createMigrationsTable();
+        $appliedMigrations = $this->getAppliedMigrations();
+
+        $newMigrations = [];
+        $files = scandir(Application::$ROOT_DIR . "/migrations");
+
+        $toApplyMigrations = array_diff($files, $appliedMigrations);
+
+        foreach ($toApplyMigrations as $migration) {
+            if ($migration === "." || $migration === "..") {
+                continue;
+            }
+
+            require_once Application::$ROOT_DIR . "/migrations/" . "$migration";
+
+            $classname = pathinfo($migration, PATHINFO_FILENAME);
+            $class = "app\migrations\\" . $classname;
+            $instance = new $class;
+
+            $this->log("Applying Migrations $migration ");
+            $instance->up();
+            $this->log("Applied Migrations $migration ");
+
+            $newMigrations[] = $migration;
+        }
+
+        if (!empty($newMigrations)) {
+            $this->saveMigrations($newMigrations);
+        } else {
+            $this->log("All Migrations are applied");
+        }
+
+    }
+
+    public function createMigrationsTable()
+    {
+        $this->pdo->exec("
+            CREATE TABLE IF NOT EXISTS migrations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                migration VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=INNODB;
+        ");
+    }
+
+    public function getAppliedMigrations()
+    {
+        $statement = $this->pdo->prepare("SELECT migration FROM migrations");
+        $statement->execute();
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public function saveMigrations(array $newMigrations)
+    {
+        $strValue = implode(",", array_map(fn($m) => "('$m')", $newMigrations));
+
+        $statement = $this->pdo->prepare("INSERT INTO migrations (migration) VALUES $strValue ");
+        $statement->execute();
+    }
+
+    protected function log(string $message) {
+        echo "[" . date("Y-m-d H:i:s") . "] - $message " . PHP_EOL;
+    }
+
 }
