@@ -7,11 +7,26 @@ use app\core\form\Form;
 $form = Form::begin("", "post");
 ?>
 
-    <?php echo $form->field($model, "firstname", "text")  ?>
-    <?php echo $form->field($model, "lastname", "text")  ?>
-    <?php echo $form->field($model, "email", "text")  ?>
-    <?php echo $form->field($model, "password", "password")  ?>
-    <?php echo $form->field($model, "confirmPassword", "password")  ?>
+    <div class="row">
+        <div class="col mb-3">
+            <?php echo $form->field($model, "firstname", "text")  ?>
+        </div>
+        <div class="col mb-3">
+            <?php echo $form->field($model, "lastname", "text")  ?>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <?php echo $form->field($model, "email", "text")  ?>
+    </div>
+
+    <div class="mb-3">
+        <?php echo $form->field($model, "password", "password")  ?>
+    </div>
+
+    <div class="mb-3">
+        <?php echo $form->field($model, "confirmPassword", "password")  ?>
+    </div>
     <button type="submit" class="btn btn-primary">Register</button>
 
 <?php Form::end(); ?>
