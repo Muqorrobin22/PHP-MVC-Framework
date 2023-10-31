@@ -29,7 +29,7 @@ class Field
              </div>
         ',
             $this->attribute,
-            $this->model->labels()[$this->attribute] ?? $this->attribute,
+            $this->model->getLabel($this->attribute),
             $this->typeInput,
             $this->model->hasError($this->attribute) ? "is-invalid" : "",
             $this->model->{$this->attribute},
